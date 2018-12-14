@@ -1,4 +1,5 @@
 const path = require('path');
+const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
@@ -11,7 +12,12 @@ module.exports = {
   },
   output: {
     path: path.resolve(__dirname, "../dist"),
-    filename: "[name].[contenthash].js"
+    filename: "[name].[hash].js"
+    //filename: "[name].[contenthash].js"
+  },
+  devtool: "source-map",
+  resolve: {
+    extensions: [' ','.js','.json','.vue','.scss','.css']
   },
   module: {
     rules: [
@@ -41,6 +47,17 @@ module.exports = {
         loader: "babel-loader",
         /* 排除模块安装目录的文件 */
         exclude: /node_modules/
+      },
+      {
+        test: /\.(png|jpg|gif)$/,
+        use: [
+          { 
+            loader: 'url-loader',
+            options: {
+              limit: 8192
+            }
+          }
+        ]
       }
     ]
   },
@@ -57,6 +74,8 @@ module.exports = {
       filename: "./main.css"
     }),
     new VueLoaderPlugin(),
+    new webpack.HotModuleReplacementPlugin(),
+    new webpack.NamedModulesPlugin(),
     new CleanWebpackPlugin(['dist'], {
       root: path.resolve(__dirname, '..'),
       dry: false
@@ -73,8 +92,9 @@ module.exports = {
     compress: true,
     port: 8888,
     inline: true, //设置为true，当源文件改变的时候会自动刷新
-    historyApiFallback: true, //在开发单页应用时非常有用，它依赖于HTML5 history API，如果设置为true，所有的跳转将指向index.html
+    // historyApiFallback: true, //在开发单页应用时非常有用，它依赖于HTML5 history API，如果设置为true，所有的跳转将指向index.html
     hot: true, //允许热加载
-    open: true
+    open: true,
+    overlay: true  // 如果代码出错，会在浏览器页面弹出“浮动层”。类似于 vue-cli 等脚手架
   }
-}
+};
